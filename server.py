@@ -1,38 +1,21 @@
-from http.server import HTTPServer, BaseHTTPRequestHandler
+import http.server
+import socketserver
 
-class RequestHandler(BaseHTTPRequestHandler):
+class RequesHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/search':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            with open('search.html', 'rb') as f:
-                self.wfile.write(f.read())
+        if self.path == '/':
+            self.path='templates/search.html'
+            return http.server.SimpleHTTPRequestHandler.do_GET(self)
         elif self.path == '/resolution':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            with open('resolution.html', 'rb') as f:
-                self.wfile.write(f.read())
+            self.path='templates/resolution.html'
+            return http.server.SimpleHTTPRequestHandler.do_GET(self)
         else:
-            self.send_response(404)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            self.wfile.write(b'<html><body>404 Not Found</body></html>')
-            
-    def do_POST(self):
-        if self.path == '/search':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            with open('search.html', 'rb') as f:
-                self.wfile.write(f.read())
-        else:
-            self.send_response(404)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            self.wfile.write(b'<html><body>404 Not Found</body></html>')
+            self.send_error(404, 'File Not Found: %s' % self.path)
 
-httpd = HTTPServer(('localhost', 8000), RequestHandler)
+HOST='localhost'
+PORT=8000
+ADDR=(HOST,PORT)
+httpd = socketserver.TCPServer((ADDR),RequesHandler)
+print(f"[STARTING] server is starting on PORT: {PORT}")
 httpd.serve_forever()
 
