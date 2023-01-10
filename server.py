@@ -1,25 +1,26 @@
-import http.server
-import socketserver
+from flask import Flask, render_template, request
 
-class RequesHandler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
-        print(f'get fun: {self.path}')
-        if self.path == '/':
-            self.path='templates/search.html'
-            return http.server.SimpleHTTPRequestHandler.do_GET(self)
-        elif self.path == '/resolution':
-            self.path='templates/resolution.html'
-            return http.server.SimpleHTTPRequestHandler.do_GET(self)
-        else:
-            self.send_error(404, 'File Not Found: %s' % self.path)
-    
-    def do_POST(self):
-        print(f'post fun: {self.path}')
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/detect',methods=['POST'])
+def detect():
+    # Add input validation
+    inputData = request.form['inputData']
+    # Pass result to template
+    return render_template('detect.html', inputData=inputData)
+
+@app.route('/result', methods=['POST'])
+def result():
+    result = request.form['result']
+    return render_template('result.html', result=result)
+
 
 HOST='localhost'
 PORT=8000
-ADDR=(HOST,PORT)
-httpd = socketserver.TCPServer((ADDR),RequesHandler)
-print(f"[STARTING] server is starting on PORT: {PORT}")
-httpd.serve_forever()
-
+if __name__ == '__main__':
+    print(f"[STARTING] server is starting on PORT: {PORT}")
+    app.run(host=HOST,port=PORT)
