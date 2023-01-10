@@ -5,13 +5,53 @@
   <body>
     
     <h1>Welcome to the Detect Page</h1>
+    <h2>Items in Insert List:</h2>
+    <ul>
+        {% for item in insertList %}
+            <li>
+              <button onclick="addToInputList('{{ item }}')">Add to input list</button>
+              <button onclick="addToOutputList('{{ item }}')">Add to output list</button>
+            </li>
+        {% endfor %}
+    </ul>
     
-    <p>You entered: {{ inputData }}</p>
+    <script>
+      function addToInputList(item) {
+        fetch('/input', {
+            method: 'POST',
+            body: JSON.stringify({'item': item}),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(function(response) {
+            return response.json();
+        }).then(function(data) {
+            alert(`${item} added to Input List`);
+        });
+      }
+
+    function addToOutputList(item) {
+      fetch('/output', {
+          method: 'POST',
+          body: JSON.stringify({'item': item}),
+          headers: {
+              'Content-Type': 'application/json'
+          }
+      }).then(function(response) {
+          return response.json();
+      }).then(function(data) {
+          alert(`${item} added to Output List`);
+      });
+    }
+
+    </script>
     
     <form action="/result" method="POST">
-        <input type="hidden" id="result" name="result" value="{{ inputData }}">
-        <button type="submit">Submit</button>
+      <input type="hidden" id="inputList" name="inputList" value="{{ inputList }}">
+      <input type="hidden" id="outputList" name="outputList" value="{{ outputList }}">
+      <button type="submit">Submit</button>
     </form>
 
   </body>
 </html>
+
