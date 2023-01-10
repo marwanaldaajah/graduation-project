@@ -1,0 +1,17 @@
+<html>
+  <head>
+    <title>Detect Page</title>
+  </head>
+  <body>
+    
+    <h1>Welcome to the Detect Page</h1>
+    
+    <p>You entered: {{ inputData }}</p>
+    
+    <form action="/result" method="POST">
+        <input type="hidden" id="result" name="result" value="{{ inputData }}">
+        <button type="submit">Submit</button>
+    </form>
+
+  </body>
+</html>
