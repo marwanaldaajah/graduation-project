@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <title>Results</title>
+    </head>
+    <body>
+        <script>
+            let data = new URLSearchParams(window.location.search).get('data');
+            let resultDiv=document.createElement('div');
+            resultDiv.innerHTML='<p>Results:${data}</p>';
+            document.body.appendChild(resulutsDiv);
+        </script>
+    </body>
+</html>
