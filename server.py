@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -6,12 +7,12 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-@app.route('/detect',methods=['POST'])
+@app.route('/detect', methods=['POST'])
 def detect():
-    # Add input validation
-    inputData = request.form['inputData']
-    # Pass result to template
+    file = request.files['file']
+    inputData = pd.read_csv(file)
     return render_template('detect.html', inputData=inputData)
+
 
 @app.route('/result', methods=['POST'])
 def result():
