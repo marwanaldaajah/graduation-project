@@ -1,17 +1,62 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Detect Page</title>
-  </head>
-  <body>
-    
-    <h1>Welcome to the Detect Page</h1>
-    
-    <p>You entered: {{ inputData }}</p>
-    
-    <form action="/result" method="POST">
-        <input type="hidden" id="result" name="result" value="{{ inputData }}">
-        <button type="submit">Submit</button>
-    </form>
+<head>
+  <title>MLAAS</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-  </body>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    tr:nth-child(even){background-color: #f2f2f2}
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Detected Organizations</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Website</th>
+        <th>Country</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for org in orgs %}
+        <tr>
+          <td>{{ org.Name }}</td>
+          <td>{{ org.Website }}</td>
+          <td>{{ org.Country }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</body>
 </html>
