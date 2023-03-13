@@ -1,57 +1,62 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Detect Page</title>
-  </head>
-  <body>
-    
-    <h1>Welcome to the Detect Page</h1>
-    <h2>Items in Insert List:</h2>
-    <ul>
-        {% for item in insertList %}
-            <li>
-              <button onclick="addToInputList('{{ item }}')">Add to input list</button>
-              <button onclick="addToOutputList('{{ item }}')">Add to output list</button>
-            </li>
-        {% endfor %}
-    </ul>
-    
-    <script>
-      function addToInputList(item) {
-        fetch('/input', {
-            method: 'POST',
-            body: JSON.stringify({'item': item}),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(function(response) {
-            return response.json();
-        }).then(function(data) {
-            alert(`${item} added to Input List`);
-        });
-      }
-
-    function addToOutputList(item) {
-      fetch('/output', {
-          method: 'POST',
-          body: JSON.stringify({'item': item}),
-          headers: {
-              'Content-Type': 'application/json'
-          }
-      }).then(function(response) {
-          return response.json();
-      }).then(function(data) {
-          alert(`${item} added to Output List`);
-      });
+<head>
+  <title>MLAAS</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
-    </script>
-    
-    <form action="/result" method="POST">
-      <input type="hidden" id="inputList" name="inputList" value="{{ inputList }}">
-      <input type="hidden" id="outputList" name="outputList" value="{{ outputList }}">
-      <button type="submit">Submit</button>
-    </form>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 20px;
+    }
 
-  </body>
+    th, td {
+      text-align: left;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    tr:nth-child(even){background-color: #f2f2f2}
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Detected Organizations</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Website</th>
+        <th>Country</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for org in orgs %}
+        <tr>
+          <td>{{ org.Name }}</td>
+          <td>{{ org.Website }}</td>
+          <td>{{ org.Country }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</body>
 </html>
-
