@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>MLAAS</title>
   <style>
@@ -10,6 +11,11 @@
       height: 100vh;
     }
 
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
@@ -17,7 +23,8 @@
       margin-bottom: 20px;
     }
 
-    th, td {
+    th,
+    td {
       text-align: left;
       padding: 8px;
     }
@@ -27,36 +34,38 @@
       color: white;
     }
 
-    tr:nth-child(even){background-color: #f2f2f2}
-
-    h1 {
-      text-align: center;
-      font-size: 2rem;
+    tr:nth-child(even) {
+      background-color: #f2f2f2
     }
   </style>
 </head>
+
 <body>
 
-  <h1>Detected Organizations</h1>
+  <h1>Select Input and Output Columns</h1>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Website</th>
-        <th>Country</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for org in orgs %}
+  <form action="/result" method="post">
+    <table>
+      <thead>
         <tr>
-          <td>{{ org.Name }}</td>
-          <td>{{ org.Website }}</td>
-          <td>{{ org.Country }}</td>
+          <th>Column Name</th>
+          <th>Input</th>
+          <th>Output</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for column in columns or [] %}
+          <tr>
+            <td>{{ column }}</td>
+            <td><input type="checkbox" name="input_columns" value="{{ column }}"></td>
+            <td><input type="checkbox" name="output_columns" value="{{ column }}"></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit">Submit</button>
+  </form>
 
 </body>
+
 </html>
