@@ -1,31 +1,28 @@
-import pickle
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, redirect, render_template, request
 import os
-from database import Database
-import pandas as pd
 from sklearn.model_selection import train_test_split
+
 from sklearn.tree import DecisionTreeClassifier
+from database import Database
 
 app = Flask(__name__)
-app.secret_key = 'my_secret_key'
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('step1.html')
 
 
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['GET', 'POST'])
 def upload():
     file = request.files['file']
     filename = file.filename
     file.save(f'uploads/{filename}')
-    return redirect(f'/detect?filename={filename}')
+    return redirect(f'/step2?filename={filename}')
 
 
-@app.route('/detect', methods=['GET', 'POST'])
-def detect():
-
+@app.route('/step2', methods=['GET', 'POST'])
+def display_table():
     filename = request.args.get('filename')
     file_path = f'uploads/{filename}'
 
@@ -38,31 +35,36 @@ def detect():
         output_columns = request.form.getlist('output_columns')
         if not input_columns or not output_columns:
             return render_template('error.html', message="Please select at least one input and one output column")
+        return redirect('/step3', file_path=file_path, input_columns=input_columns, output_columns=output_columns)
+    
 
-    return render_template('detect.html',columns=columns)
+    return render_template('step2.html', columns=columns)
 
 
-@app.route('/result', methods=['POST'])
-def result():
-    filename = request.args.get('filename')
-    file_path = f'uploads/{filename}'
+@app.route('/step3', methods=['GET', 'POST'])
+def splitting():
+    if request.method == 'POST':
+        file_path = request.args.get('file_path')
+        input_columns = request.form.getlist('input_columns')
+        output_columns = request.form.getlist('output_columns')
+        
+        input1 = request.form.get('input1')
+        input2 = request.form.get('input2')
 
-    # Read CSV file
-    database = Database(file_path)
+    file = 'uploads/organization.csv'
+    database = Database(file)
     df = database.readFileScv()
 
-    input_columns = request.form.getlist('input_columns')
-    output_columns = request.form.getlist('output_columns')
-    if not input_columns or not output_columns:
-        return render_template('error.html', message="Please select at least one input and one output column")
+    X=df[input_columns].values
+    y=df[output_columns].values
 
-    # Split data into train and test sets
-    X = df[input_columns]
-    y = df[output_columns]
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3, random_state=42)
+    print(f'x={X}')
+    print(f'y={y}')
 
-    return render_template('result.html', input_columns=input_columns, output_columns=output_columns)
+
+    return render_template('step3.html')
+
+
 
 
 HOST = 'localhost'
@@ -73,17 +75,3 @@ if __name__ == '__main__':
     print(f"[STARTING] server is starting on PORT: {PORT}")
     app.run(debug=True, host=HOST, port=PORT)
 
-# @app.route('/run-algorithm', methods=['POST'])
-# def run_algorithm():
-#     splitting_value = request.form['splitting_value']
-#     X_train = session.get('X_train')
-#     y_train = session.get('y_train')
-#     # apply the machine learning algorithm
-#     model = DecisionTreeClassifier()
-#     model.fit(X_train, y_train)
-#     # save the resulting model for later use
-#     model_filename = f'model_{session.sid}.pkl'
-#     with open(model_filename, 'wb') as file:
-#         pickle.dump(model, file)
-#     session['model_filename'] = model_filename
-#     return render_template('step4.html', model=model)
