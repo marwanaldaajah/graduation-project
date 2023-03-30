@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Models</title>
+</head>
+
+<body>
+
+
+    {% if session.get('training_in_progress') %}
+    <div class="overlay">
+        <div class="progress"></div>
+    </div>
+    {% endif %}
+
+    <h1>Select Model</h1>
+    <form method="POST">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Model Name</th>
+                    <th>Accuracy</th>
+                    <th>Select</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for model in models %}
+                <tr>
+                    <td>{{ model.name }}</td>
+                    <td>{{ model.accuracy }}</td>
+                    <td><input type="radio" name="model" value="{{ model }}"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <input type="submit" value="View Results">
+    </form>
+</body>
+
+</html>

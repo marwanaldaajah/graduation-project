@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Select Input and Output Columns</title>
+  </head>
+  <body>
+    <h1>Select Input and Output Columns</h1>
+    <!-- <form method="POST" action="/split_data"></form> -->
+    <form method="POST">
+      <table>
+        <thead>
+          <tr>
+            <th>Column Name</th>
+            <th>Input</th>
+            <th>Output</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for col in columns %}
+            <tr>
+              <td>{{ col }}</td>
+              <td><input type="checkbox" name="input_col" value="{{ col }}"></td>
+              <td><input type="checkbox" name="output_col" value="{{ col }}"></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <input type="submit" value="Select">
+    </form>
+  </body>
+</html>

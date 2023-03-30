@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Upload CSV File</title>
+  </head>
+  <body>
+    <h1>Upload CSV File</h1>
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" >
+      <input type="file" id="fileInput" name="file" accept=".csv">
+    </form>
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      fileInput.addEventListener("change", () => {
+        document.getElementById("uploadForm").submit();
+      });
+    </script>
+  </body>
+</html>
+
+
