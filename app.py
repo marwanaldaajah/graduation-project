@@ -1,17 +1,24 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import pandas as pd
+import numpy as np
+
+
+from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
+from sklearn.model_selection import train_test_split
 
 from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier, RandomForestClassifier
-from sklearn.metrics import f1_score, precision_score, recall_score
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.linear_model import PoissonRegressor
 from sklearn.svm import SVC
+from sklearn.linear_model import RidgeClassifier, SGDClassifier, PassiveAggressiveClassifier, Perceptron
+from sklearn.naive_bayes import BernoulliNB, MultinomialNB
+from sklearn.neighbors import NearestCentroid
+from sklearn.ensemble import BaggingClassifier, ExtraTreesClassifier, GradientBoostingClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 
 app = Flask(__name__)
 app.secret_key = 'fefe'
@@ -108,8 +115,8 @@ def train_model():
     try:
         input_columns = session.get(key_input_columns)
         output_columns = session.get(key_output_columns)
-        train_size = float(session.get(key_train_size)) # type: ignore
-        test_size = float(session.get(key_test_size)) # type: ignore
+        train_size = float(session.get(key_train_size))
+        test_size = float(session.get(key_test_size))
     except KeyError:
         print("Please select train and test sizes first.")
         flash("Please select train and test sizes first.")
@@ -124,50 +131,57 @@ def train_model():
         return redirect(url_for("index"))
 
     # Preprocess the data
-    X = df[input_columns] # type: ignore 
-    y = df[output_columns] # type: ignore
+    X = df[input_columns]
+    y = df[output_columns]
 
     # Split the data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, train_size=train_size, test_size=test_size)
+    
+    # Flatten y_train and y_test to one-dimensional arrays
+    y_train = np.ravel(y_train)
+    y_test = np.ravel(y_test)
 
     # Build machine learning models
     machineLearningModels = [
-        ("Logistic Regression", LogisticRegression()),
+        ("Logistic Regression", LogisticRegression(max_iter=1000, solver='liblinear')),
         ("Decision Tree", DecisionTreeClassifier()),
         ("Support Vector Machine", SVC()),
-        ("Poisson Regressor", PoissonRegressor()),
         ("Random Forest", RandomForestClassifier()),
-        ("K-Nearest Neighbors", KNeighborsClassifier()),
+        ("Ridge Classifier", RidgeClassifier()),
+        ("SGD Classifier", SGDClassifier()),
+        ("Passive Aggressive Classifier", PassiveAggressiveClassifier()),
+        ("Perceptron", Perceptron()),
+        ("Bernoulli Naive Bayes", BernoulliNB()),
+        ("Multinomial Naive Bayes", MultinomialNB()),
+        ("Nearest Centroid", NearestCentroid()),
+        ("Bagging Classifier", BaggingClassifier()),
+        ("Extra Trees Classifier", ExtraTreesClassifier()),
         ("Gradient Boosting", GradientBoostingClassifier()),
+        ("K-Nearest Neighbors", KNeighborsClassifier()),
         ("Naive Bayes", GaussianNB()),
         ("Adaptive Boosting", AdaBoostClassifier()),
-        ("Multi-layer Perceptron", MLPClassifier()),]
+        ("Multi-layer Perceptron", MLPClassifier(max_iter=500)),
+        ("Linear Discriminant Analysis", LinearDiscriminantAnalysis()),
+        ("Quadratic Discriminant Analysis", QuadraticDiscriminantAnalysis()),
+    ]
 
     # Train and evaluate models
     models = []
-    best_accuracy = 0
     try:
         for name, model in machineLearningModels:
+            print(f"Training model: {name}")
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
-            accuracy = model.score(X_test, y_test)
-            if accuracy > best_accuracy:
-                best_accuracy = accuracy
             # calculate additional metrics as needed
             precision = precision_score(y_test, y_pred, average='micro')
             recall = recall_score(y_test, y_pred, average='micro')
             f1 = f1_score(y_test, y_pred, average='micro')
+            accuracy = accuracy_score(y_test, y_pred)
             # create a dictionary for this model's results
-            # model_results = Model(name=name,
-            #               accuracy=accuracy,
-            #               precision=precision,
-            #               recall=recall,
-            #               f1=f1)
             model_results = {
                 'name': name,
                 'accuracy': accuracy,
-
                 'precision': precision,
                 'recall': recall,
                 'f1': f1
