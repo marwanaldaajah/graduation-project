@@ -6,14 +6,9 @@
 </head>
 
 <body>
-
-
-    {% if session.get('training_in_progress') %}
-    <div class="overlay">
-        <div class="progress"></div>
-    </div>
-    {% endif %}
-
+    {% if not models %}
+    <h1>No models available. Please Try Again.</h1>
+    {% else %}
     <h1>Select Model</h1>
     <form method="POST">
 
@@ -37,6 +32,10 @@
         </table>
         <input type="submit" value="View Results">
     </form>
+    {% endif %}
+    {% if error %}
+    <p>Error occurred: {{ error }}</p>
+    {% endif %}
 </body>
 
 </html>

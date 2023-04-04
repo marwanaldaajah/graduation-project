@@ -6,6 +6,7 @@ import numpy as np
 
 from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -130,21 +131,46 @@ def train_model():
         flash("Please upload a CSV file first.")
         return redirect(url_for("index"))
 
+    # Handle missing values
+    df.dropna(inplace=True)
+    # print(f'df: {df}')
+    # Convert categorical data to numerical data
+    cat_columns = df.select_dtypes(include=['object']).columns
+    df[cat_columns] = df[cat_columns].apply(
+        lambda x: x.astype('category').cat.codes)
+    # print(f'df: {df}')
+
     # Preprocess the data
     X = df[input_columns]
     y = df[output_columns]
 
     # Split the data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, train_size=train_size, test_size=test_size)
-    
+        X, y, train_size=train_size, test_size=test_size, random_state=42)
+
+    # Normalize the data
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    # Check if there are negative values in X_train and handle them
+    if np.any(X_train < 0):
+        # Add the minimum value of X_train to make all values non-negative
+        X_train += abs(np.min(X_train))
+
+    # Check if there are negative values in X_test and handle them
+    if np.any(X_test < 0):
+        # Add the minimum value of X_test to make all values non-negative
+        X_test += abs(np.min(X_test))
+
     # Flatten y_train and y_test to one-dimensional arrays
     y_train = np.ravel(y_train)
     y_test = np.ravel(y_test)
 
     # Build machine learning models
     machineLearningModels = [
-        ("Logistic Regression", LogisticRegression(max_iter=1000, solver='liblinear')),
+        ("Logistic Regression", LogisticRegression(
+            max_iter=1000, solver='liblinear')),
         ("Decision Tree", DecisionTreeClassifier()),
         ("Support Vector Machine", SVC()),
         ("Random Forest", RandomForestClassifier()),
@@ -163,9 +189,11 @@ def train_model():
         ("Adaptive Boosting", AdaBoostClassifier()),
         ("Multi-layer Perceptron", MLPClassifier(max_iter=500)),
         ("Linear Discriminant Analysis", LinearDiscriminantAnalysis()),
-        ("Quadratic Discriminant Analysis", QuadraticDiscriminantAnalysis()),
+        ("Quadratic Discriminant Analysis", QuadraticDiscriminantAnalysis(reg_param=0.1)),
     ]
 
+    print(f'X_train: {X_train}')
+    print(f'y_train: {y_train}')
     # Train and evaluate models
     models = []
     try:
@@ -188,7 +216,7 @@ def train_model():
             }
             models.append(model_results)
     except Exception as e:
-        print(f'Error occurred: {e}')
+        print(f'Error occurred: {e} model: {name}')
     finally:
         # Hide the progress bar
         session['training_in_progress'] = False
