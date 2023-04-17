@@ -1,28 +1,14 @@
+import json
+from database import Database
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session
-import pandas as pd
-import numpy as np
+from flask import Flask, render_template, request, redirect, url_for, session
+import joblib
+from machine_learning import MachineLearning
 
 
-from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+app = Flask(__name__, template_folder='templates')
+app.secret_key = 'f1F@'
 
-from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier, RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.naive_bayes import GaussianNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import SVC
-from sklearn.linear_model import RidgeClassifier, SGDClassifier, PassiveAggressiveClassifier, Perceptron
-from sklearn.naive_bayes import BernoulliNB, MultinomialNB
-from sklearn.neighbors import NearestCentroid
-from sklearn.ensemble import BaggingClassifier, ExtraTreesClassifier, GradientBoostingClassifier
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
-
-app = Flask(__name__)
-app.secret_key = 'fefe'
 
 key_file_name = 'file_name'
 key_input_columns = 'input_columns'
@@ -36,208 +22,77 @@ key_accuracy = 'accuracy'
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    if request.method == "POST":
-        if "file" not in request.files:
-            print("No file uploaded.")
-            flash("No file uploaded.")
-            return redirect(request.url)
-        file = request.files["file"]
-        if file.filename == "":
-            print("No file selected.")
-            flash("No file selected.")
-            return redirect(request.url)
-
-        file_path = f'uploads/{file.filename}'
-        file.save(file_path)
-
-        session[key_file_name] = file_path
-        session.pop(key_input_columns, None)
-        session.pop(key_output_columns, None)
-        session.pop(key_train_size, None)
-        session.pop(key_test_size, None)
-
-        return redirect(url_for("select_columns"))
-
     return render_template("index.html")
 
 
-@app.route("/select_columns", methods=["GET", "POST"])
+@app.route('/select_columns', methods=["GET", "POST"])
 def select_columns():
-    try:
-        df = pd.read_csv(session[key_file_name])
-    except KeyError:
-        print("Please upload a CSV file first.")
-        flash("Please upload a CSV file first.")
-        return redirect(url_for("index"))
-
-    columns = df.columns.tolist()
-
+    db = Database()
     if request.method == "POST":
-        input_columns = request.form.getlist("input_col")
-        output_columns = request.form.getlist("output_col")
-        if not input_columns or not output_columns:
-            print("Please select input and output columns.")
-            flash("Please select input and output columns.")
-            return redirect(request.url)
-        session[key_input_columns] = input_columns
-        session[key_output_columns] = output_columns
-        return redirect(url_for("split_data"))
+        file = request.files["file"]
+        if not file:
+            print('Please select file.')
+            return redirect(url_for('index'))
+        else:
+            file_path = db.saveFile(file)
+            file.save(file_path)
 
-    return render_template("select_columns.html", columns=columns)
+    columns = db.readbileColumns()
+    if columns is False:
+        return redirect(request.url)
+    else:
+        return render_template('select_columns.html', columns=columns)
 
 
 @app.route("/split_data", methods=["GET", "POST"])
 def split_data():
-    input_columns = session.get(key_input_columns)
-    output_columns = session.get(key_output_columns)
-
-    if not input_columns or not output_columns:
-        print("Please select input and output columns first.")
-        flash("Please select input and output columns first.")
-        return redirect(url_for("select_columns"))
-
+    db = Database()
     if request.method == "POST":
-        train_size = request.form.get("train_size")
-        test_size = request.form.get("test_size")
-        if not train_size or not test_size:
-            flash("Please enter train and test sizes.")
-            return redirect(request.url)
-        session[key_train_size] = train_size
-        session[key_test_size] = test_size
-        return redirect(url_for("train_model"))
+        input_columns = request.form.getlist("input_col")
+        output_columns = request.form.getlist("output_col")
+        if not input_columns or not output_columns:
+            print("Please select input and output columns first.")
+            return redirect(url_for("select_columns"))
+        else:
+            db.saveInput(input_columns)
+            db.saveOutput(output_columns)
 
     return render_template("split_data.html")
 
 
 @app.route("/train_model", methods=["GET", "POST"])
 def train_model():
-    # Show the progress bar
-    session['training_in_progress'] = True
-    try:
-        input_columns = session.get(key_input_columns)
-        output_columns = session.get(key_output_columns)
-        train_size = float(session.get(key_train_size))
-        test_size = float(session.get(key_test_size))
-    except KeyError:
-        print("Please select train and test sizes first.")
-        flash("Please select train and test sizes first.")
-        return redirect(url_for("split_data"))
+    db = Database()
+    if request.method == "POST":
+        train_size = request.form.get("train_size")
+        test_size = request.form.get("test_size")
+        if not train_size or not test_size:
+            print('select train and testing size')
+            return redirect(url_for("split_data"))
+    db.saveTrainSize(train_size)
+    db.saveTestSize(test_size)
 
-    # Read in the data from the uploaded CSV file
-    try:
-        df = pd.read_csv(session[key_file_name])
-    except KeyError:
-        print("Please upload a CSV file first.")
-        flash("Please upload a CSV file first.")
-        return redirect(url_for("index"))
-
-    # Handle missing values
-    df.dropna(inplace=True)
-    # print(f'df: {df}')
-    # Convert categorical data to numerical data
-    cat_columns = df.select_dtypes(include=['object']).columns
-    df[cat_columns] = df[cat_columns].apply(
-        lambda x: x.astype('category').cat.codes)
-    # print(f'df: {df}')
-
-    # Preprocess the data
-    X = df[input_columns]
-    y = df[output_columns]
-
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, train_size=train_size, test_size=test_size, random_state=42)
-
-    # Normalize the data
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
-
-    # Check if there are negative values in X_train and handle them
-    if np.any(X_train < 0):
-        # Add the minimum value of X_train to make all values non-negative
-        X_train += abs(np.min(X_train))
-
-    # Check if there are negative values in X_test and handle them
-    if np.any(X_test < 0):
-        # Add the minimum value of X_test to make all values non-negative
-        X_test += abs(np.min(X_test))
-
-    # Flatten y_train and y_test to one-dimensional arrays
-    y_train = np.ravel(y_train)
-    y_test = np.ravel(y_test)
-
-    # Build machine learning models
-    machineLearningModels = [
-        ("Logistic Regression", LogisticRegression(
-            max_iter=1000, solver='liblinear')),
-        ("Decision Tree", DecisionTreeClassifier()),
-        ("Support Vector Machine", SVC()),
-        ("Random Forest", RandomForestClassifier()),
-        ("Ridge Classifier", RidgeClassifier()),
-        ("SGD Classifier", SGDClassifier()),
-        ("Passive Aggressive Classifier", PassiveAggressiveClassifier()),
-        ("Perceptron", Perceptron()),
-        ("Bernoulli Naive Bayes", BernoulliNB()),
-        ("Multinomial Naive Bayes", MultinomialNB()),
-        ("Nearest Centroid", NearestCentroid()),
-        ("Bagging Classifier", BaggingClassifier()),
-        ("Extra Trees Classifier", ExtraTreesClassifier()),
-        ("Gradient Boosting", GradientBoostingClassifier()),
-        ("K-Nearest Neighbors", KNeighborsClassifier()),
-        ("Naive Bayes", GaussianNB()),
-        ("Adaptive Boosting", AdaBoostClassifier()),
-        ("Multi-layer Perceptron", MLPClassifier(max_iter=500)),
-        ("Linear Discriminant Analysis", LinearDiscriminantAnalysis()),
-        ("Quadratic Discriminant Analysis", QuadraticDiscriminantAnalysis(reg_param=0.1)),
-    ]
-
-    print(f'X_train: {X_train}')
-    print(f'y_train: {y_train}')
-    # Train and evaluate models
-    models = []
-    try:
-        for name, model in machineLearningModels:
-            print(f"Training model: {name}")
-            model.fit(X_train, y_train)
-            y_pred = model.predict(X_test)
-            # calculate additional metrics as needed
-            precision = precision_score(y_test, y_pred, average='micro')
-            recall = recall_score(y_test, y_pred, average='micro')
-            f1 = f1_score(y_test, y_pred, average='micro')
-            accuracy = accuracy_score(y_test, y_pred)
-            # create a dictionary for this model's results
-            model_results = {
-                'name': name,
-                'accuracy': accuracy,
-                'precision': precision,
-                'recall': recall,
-                'f1': f1
-            }
-            models.append(model_results)
-    except Exception as e:
-        print(f'Error occurred: {e} model: {name}')
-    finally:
-        # Hide the progress bar
-        session['training_in_progress'] = False
-
-    if request.method == 'POST':
-        selectedModel = request.form.get("model")
-        if selectedModel is None:
-            print("Invalid model selected.")
-            flash("Invalid model selected.")
-            return redirect(url_for("train_model"))
-        session[key_model] = selectedModel
-        return redirect(url_for('model_result'))
-
+    machineLearning = MachineLearning()
+    models = machineLearning.evaluate_models()
     return render_template("training.html", models=models)
 
 
 @app.route("/model_result", methods=["GET", "POST"])
 def model_result():
-    selectedModel = session.get(key_model)
-    print(f'selectedModel: {selectedModel}')
-    return render_template("model_results.html", model=selectedModel)
+    if request.method == 'POST':
+        model = request.form.get("model")
+    return render_template("model_results.html", model=model)
+
+
+@app.route('/save_model', methods=["GET", "POST"])
+def save_model_route():
+    if request.method == 'POST':
+        model = request.form.get("model")
+        index=model[6]
+        print(f'index: {index}')
+        # joblib.dump(model, 'model-result.joblib')
+        # predictions = model.predict('')
+    return render_template("model_results.html", model=model)
 
 
 HOST = 'localhost'
@@ -247,3 +102,88 @@ if not os.path.exists('uploads'):
 if __name__ == '__main__':
     print(f"[STARTING] server is starting on PORT: {PORT}")
     app.run(debug=True, host=HOST, port=PORT)
+
+
+# @app.route("/train_model", methods=["GET", "POST"])
+# def train_model():
+#     db = Database()
+#     if request.method == "POST":
+#         train_size = request.form.get("train_size")
+#         test_size = request.form.get("test_size")
+#         if not train_size or not test_size:
+#             print('select train and testing size')
+#             return redirect(url_for("split_data"))
+#         else:
+#             db.saveTestSize(train_size)
+#             db.saveTestSize(test_size)
+
+#     df = db.readFileScv()
+#     input_columns = db.readInputColumn()
+#     output_columns = db.readOutputColumns()
+#     train_size = db.readTrainSize()
+#     test_size = db.readTestSize()
+
+#     # Handle missing values
+#     df.dropna(inplace=True)
+#     # print(f'df: {df}')
+#     # Convert categorical data to numerical data
+#     cat_columns = df.select_dtypes(include=['object']).columns
+#     df[cat_columns] = df[cat_columns].apply(
+#         lambda x: x.astype('category').cat.codes)
+#     # print(f'df: {df}')
+
+#     # Preprocess the data
+#     X = df[input_columns]
+#     y = df[output_columns]
+
+#     # Split the data into training and testing sets
+#     X_train, X_test, y_train, y_test = train_test_split(
+#         X, y, train_size=train_size, test_size=test_size, random_state=42)
+
+#     # Normalize the data
+#     scaler = StandardScaler()
+#     X_train = scaler.fit_transform(X_train)
+#     X_test = scaler.transform(X_test)
+
+#     # Check if there are negative values in X_train and handle them
+#     if np.any(X_train < 0).any():
+#         # Add the minimum value of X_train to make all values non-negative
+#         X_train += abs(np.min(X_train))
+
+#     # Check if there are negative values in X_test and handle them
+#     if np.any(X_test < 0).any():
+#         # Add the minimum value of X_test to make all values non-negative
+#         X_test += abs(np.min(X_test))
+
+#     # Flatten y_train and y_test to one-dimensional arrays
+#     y_train = np.ravel(y_train)
+#     y_test = np.ravel(y_test)
+
+#     # Train and evaluate models
+#     models = []
+#     i = 0
+#     try:
+#         for name, model in machineLearningModels:
+#             print(f'i: {i} , test model name: {name}')
+#             model.fit(X_train, y_train)
+#             y_pred = model.predict(X_test)
+#             # calculate additional metrics as needed
+#             precision = precision_score(y_test, y_pred, average='micro')
+#             recall = recall_score(y_test, y_pred, average='micro')
+#             f1 = f1_score(y_test, y_pred, average='micro')
+#             accuracy = accuracy_score(y_test, y_pred)
+#             # create a dictionary for this model's results
+#             model_results = {
+#                 'index': i,
+#                 'name': name,
+#                 'accuracy': accuracy,
+#                 'precision': precision,
+#                 'recall': recall,
+#                 'f1': f1
+#             }
+#             models.append(model_results)
+#             i = i + 1
+#     except Exception as e:
+#         print(f'Error occurred: {e} model: {name}')
+
+#     return render_template("training.html", models=models)

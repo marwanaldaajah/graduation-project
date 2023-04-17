@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
 
 <head>
@@ -61,7 +61,7 @@
 
 <body>
   <h1>Model Display Results</h1>
-  
+
   <table>
     <thead>
       <tr>
@@ -74,7 +74,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>{{ model.name }}</td>
+        <td>{{ model['name'] }}</td>
         <td>{{ model.accuracy }}</td>
         <td>{{ model.precision }}</td>
         <td>{{ model.recall }}</td>
@@ -94,4 +94,19 @@
 
 </body>
 
+</html> -->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Model Results</title>
+</head>
+<body>
+  <h1>Model Display Results</h1>
+    <h2>{{ model }}</h2>
+  <form method="post" action="{{ url_for('save_model_route') }}">
+    <input type="hidden" name="model" value="{{ model }}">
+    <button type="submit">Save Model</button>
+  </form>
+</body>
 </html>

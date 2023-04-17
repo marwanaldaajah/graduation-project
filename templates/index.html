@@ -5,14 +5,14 @@
   </head>
   <body>
     <h1>Upload CSV File</h1>
-    <form id="uploadForm" method="POST" enctype="multipart/form-data" >
+    <form id="uploadborm" method="POST" enctype="multipart/form-data" action = "{{url_for('select_columns')}}">
       <input type="file" id="fileInput" name="file" accept=".csv">
     </form>
 
     <script>
       const fileInput = document.getElementById("fileInput");
       fileInput.addEventListener("change", () => {
-        document.getElementById("uploadForm").submit();
+        document.getElementById("uploadborm").submit();
       });
     </script>
   </body>
