@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -19,43 +19,6 @@
     th {
       background-color: #ddd;
     }
-
-    .chart {
-      display: flex;
-      height: 200px;
-      width: 100%;
-      background-color: #f2f2f2;
-      border-radius: 10px;
-      border: 1px solid black;
-      overflow: hidden;
-      transform: scaleY(-1);
-      margin-top: 20px;
-    }
-
-    .bar {
-      flex: 1;
-      height: 0;
-      margin-right: 10px;
-      margin-left: 10px;
-      background-color: #0072c6;
-      transition: height 0.3s ease;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .bar:hover {
-      background-color: #005ea3;
-    }
-
-    .bar::before {
-      content: attr(title);
-      position: absolute;
-      top: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-weight: bold;
-      font-size: 14px;
-    }
   </style>
 </head>
 
@@ -65,7 +28,7 @@
   <table>
     <thead>
       <tr>
-        <th>Algorithm</th>
+        <th>Name</th>
         <th>Accuracy</th>
         <th>Precision</th>
         <th>Recall</th>
@@ -74,7 +37,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>{{ model['name'] }}</td>
+        <td>{{ model.name }}</td>
         <td>{{ model.accuracy }}</td>
         <td>{{ model.precision }}</td>
         <td>{{ model.recall }}</td>
@@ -83,30 +46,11 @@
     </tbody>
   </table>
 
-  <div class="chart">
-    <div class="bar" style="height: 95%;"></div>
-    <div class="bar" style="height: 70.2%;"></div>
-    <div class="bar" style="height: 30.2%;"></div>
-    <div class="bar" style="height: 10.2%;"></div>
+  <div>
+    <img src="data:image/png;base64,{{ plot_data }}" alt="Model Performance">
   </div>
-
-  <h2>{{ model }}</h2>
-
+  
+  
 </body>
 
-</html> -->
-
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Model Results</title>
-</head>
-<body>
-  <h1>Model Display Results</h1>
-    <h2>{{ model }}</h2>
-  <form method="post" action="{{ url_for('save_model_route') }}">
-    <input type="hidden" name="model" value="{{ model }}">
-    <button type="submit">Save Model</button>
-  </form>
-</body>
 </html>
