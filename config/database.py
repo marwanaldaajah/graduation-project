@@ -75,7 +75,6 @@ class Database:
     def readbileScv(self):
         try:
             file_path=session.get(self.key_file_name)
-            print(f'filee_path: {file_path}')
             db = pd.read_csv(file_path)
             return db
         except FileNotFoundError as e:
@@ -84,6 +83,22 @@ class Database:
         except pd.errors.ParserError as e:
             print(f"Error occurred when reading file. error: {e}")
             return False
+
+    def dataDiscribstion(self):
+        try:
+            file_path=session.get(self.key_file_name)
+            db = pd.read_csv(file_path)
+            num_rows, num_cols = db.shape
+            print(f'num_rows: {num_rows}')
+            print(f'num_cols: {num_cols}')
+            return num_rows, num_cols
+        except FileNotFoundError as e:
+            print(f"Error occurred when reading file. error: {e}")
+            return False, False
+        except pd.errors.ParserError as e:
+            print(f"Error occurred when reading file. error: {e}")
+        return False, False
+
 
     def readbileColumns(self):
         try:
@@ -117,7 +132,6 @@ class Database:
     def readTrainSize(self):
         try:
             size = float(session.get(self.key_train_size))
-            print(f'key_train_size: {size}')
             train_size = size
             return train_size
         except KeyError as e:
@@ -127,7 +141,6 @@ class Database:
     def readTestSize(self):
         try:
             size = float(session.get(self.key_test_size))
-            print(f'key_test_size: {size}')
             train_size = size
             return train_size
         except KeyError as e:

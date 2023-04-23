@@ -1,14 +1,18 @@
 
+import pickle
+import time
 from matplotlib import pyplot as plt
 from config.database import Database
 import os
 from flask import Flask, render_template, request, redirect, url_for
 import joblib
 from config.machine_learning import MachineLearning
+from model.model import Model
 
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = 'f1F@'
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -52,39 +56,44 @@ def split_data():
 
 @app.route("/train_model", methods=["GET", "POST"])
 def train_model():
-    db = Database()
     if request.method == "POST":
         train_size = request.form.get("train_size")
         test_size = request.form.get("test_size")
         if not train_size or not test_size:
             print('select train and testing size')
             return redirect(url_for("split_data"))
+        db = Database()
         db.saveTrainSize(train_size)
         db.saveTestSize(test_size)
 
         machineLearning = MachineLearning()
         models = machineLearning.evaluate_models()
-
         if not os.path.exists("result"):
             os.makedirs("result")
         for model in models:
-            joblib.dump(model['model'], f"result/{model['index']}.joblib")
+            joblib.dump(model.model, f"result/{model.index}.joblib")
         return render_template("training.html", models=models)
     return redirect(url_for("split_data"))
 
+
 @app.route("/model_result", methods=["GET", "POST"])
 def model_result():
-    if request.method == 'POST':
+
         index = request.form.get("model")
         model_path = f"result/{index}.joblib"
         model = joblib.load(model_path)
 
         machineLearning = MachineLearning()
-        model = machineLearning.evaluate_model(model)
+
+        model = machineLearning.evaluate_modelJoblib(model)
+        # machineLearning.evaluate_modelsStaticLest()
         plot_data = plot_results(model)
 
-    return render_template("model_results.html", model=model, plot_data=plot_data)
+        return render_template("model_results.html", model=model, plot_data=plot_data)
 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import io
 import base64
 
@@ -110,6 +119,7 @@ def plot_results(model):
     # Encode the buffer as a base64 string and embed it in the HTML page
     plot_data = base64.b64encode(buf.getvalue()).decode('ascii')
     return plot_data
+
 
 
 HOST = 'localhost'
