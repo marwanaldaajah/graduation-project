@@ -66,8 +66,12 @@ def train_model():
         db.saveTrainSize(train_size)
         db.saveTestSize(test_size)
 
+        print('start')
         machineLearning = MachineLearning()
-        models = machineLearning.evaluate_models()
+        models = machineLearning.evaluateModels()
+        modells = machineLearning.evaluateModelsUsJoblib()
+        modells = machineLearning.evaluateModelsUsFixedLest()
+        print('end')
         if not os.path.exists("result"):
             os.makedirs("result")
         for model in models:
@@ -85,7 +89,7 @@ def model_result():
 
         machineLearning = MachineLearning()
 
-        model = machineLearning.evaluate_modelJoblib(model)
+        # model = machineLearning.evaluate_modelJoblib(model)
         # machineLearning.evaluate_modelsStaticLest()
         plot_data = plot_results(model)
 
@@ -122,7 +126,7 @@ def plot_results(model):
 
 
 
-HOST = 'localhost'
+HOST = '0.0.0.0'
 PORT = 8000
 if not os.path.exists('uploads'):
     os.makedirs

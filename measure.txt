@@ -1,0 +1,21 @@
+insurance
+num_rows: 1338
+num_cols: 7
+
+measure the time taken to evaluate the models using threading & joblib: 1.2797367572784424
+measure the time taken to evaluate the models using joblib 1.072615385055542
+measure the time taken to evaluate the models using fixed list 1.045590877532959
+
+All Car and Motorbike Products
+num_rows: 1272
+num_cols: 9
+measure the time taken to evaluate the models using threading & joblib: 30.394880533218384    
+measure the time taken to evaluate the models using joblib 28.803759336471558
+measure the time taken to evaluate the models using fixed list 28.74320125579834
+
+Customer
+num_rows: 2000
+num_cols: 8
+measure the time taken to evaluate the models using threading & joblib: 5.340087890625        
+measure the time taken to evaluate the models using joblib 5.290255784988403
+measure the time taken to evaluate the models using fixed list 4.423954963684082
