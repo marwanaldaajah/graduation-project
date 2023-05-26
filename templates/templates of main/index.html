@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Upload CSV File</title>
+    <style>
+      body {
+        background-color: #d3f9d8; /* Light green background color */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      input[type="file"] {
+        background-color: green;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Upload CSV File</h1>
+    <form id="uploadborm" method="POST" enctype="multipart/form-data" action="{{url_for('select_columns')}}">
+      <input type="file" id="fileInput" name="file" accept=".csv">
+    </form>
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      fileInput.addEventListener("change", () => {
+        document.getElementById("uploadborm").submit();
+      });
+    </script>
+  </body>
+</html>
