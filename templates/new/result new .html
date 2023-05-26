@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Result Page</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			background-color: #F8F8F8;
+		}
+
+		.container {
+			width: 80%;
+			max-width: 800px;
+			margin: 0 auto;
+			text-align: center;
+			padding-top: 50px;
+		}
+
+		h1 {
+			font-size: 3rem;
+			margin-bottom: 30px;
+			color: #555;
+		}
+
+		p {
+			font-size: 2rem;
+			margin-bottom: 30px;
+			color: #777;
+		}
+
+		.result {
+			font-size: 4rem;
+			font-weight: bold;
+			color: #1E90FF;
+		}
+
+		button {
+			font-size: 2rem;
+			padding: 10px 20px;
+			border: none;
+			border-radius: 5px;
+			background-color: #1E90FF;
+			color: #FFF;
+			cursor: pointer;
+			transition: all 0.2s ease;
+		}
+
+		button:hover {
+			background-color: #4d94ff;
+		}
+	</style>
+</head>
+<body>
+
+	<div class="container">
+
+		<h1>Welcome to the Result Page</h1>
+	    
+	    <p>The result is:</p>
+
+	    <div class="result">{{ result }}</div>
+
+	    <button onclick="window.history.back()">Go Back</button>
+	    
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Select Input and Output Columns</title>
+    <style>
+      body {
+        background-color: #d3f9d8; /* Light green background color */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: center;
+      }
+
+      input[type="checkbox"],
+      input[type="submit"] {
+        background-color: green;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Select Input and Output Columns</h1>
+    <form method="POST" action="{{ url_for('split_data') }}">
+      <table>
+        <thead>
+          <tr>
+            <th>Column Name</th>
+            <th>Input</th>
+            <th>Output</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>{{ col }}</td>
+            <td><input type="checkbox" name="input_col" value="{{ col }}"></td>
+            <td><input type="checkbox" name="output_col" value="{{ col }}"></td>
+          </tr>
+          
+        </tbody>
+      </table>
+      <input type="submit" value="Select">
+    </form>
+  </body>
+</html>
