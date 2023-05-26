@@ -255,10 +255,20 @@ class MachineLearning:
         return accuracy_score(y_test, y_pred)
 
     def get_precision(self, y_test, y_pred):
-        return precision_score(y_test, y_pred, average='macro')
+        return precision_score(y_test, y_pred)
 
     def get_recall(self, y_test, y_pred):
-        return recall_score(y_test, y_pred, average='macro')
+        return recall_score(y_test, y_pred)
 
     def get_f1(self, y_test, y_pred):
-        return f1_score(y_test, y_pred, average='macro')
+        return f1_score(y_test, y_pred)
+
+
+    # def get_precision(self, y_test, y_pred):
+    #     return precision_score(y_test, y_pred, average='macro')
+
+    # def get_recall(self, y_test, y_pred):
+    #     return recall_score(y_test, y_pred, average='macro')
+
+    # def get_f1(self, y_test, y_pred):
+    #     return f1_score(y_test, y_pred, average='macro')
