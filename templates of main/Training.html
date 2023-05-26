@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Models</title>
+    <style>
+        body {
+            background-color: #eaf6e1; /* Light green background color */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ccc;
+        }
+
+        input[type="radio"],
+        input[type="submit"] {
+            background-color: green;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    {% if not models %}
+    <h1>No models available. Please Try Again.</h1>
+    {% else %}
+    <h1>Select Model</h1>
+    <form method="POST" action="{{ url_for('model_result') }}">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Model Name</th>
+                    <th>Accuracy</th>
+                    <th>Select</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for model in models %}
+                <tr>
+                    <td>{{ model.name }}</td>
+                    <td>{{ model.accuracy }}</td>
+                    <td>
+                        <input type="radio" name="model" value="{{ model.index }}">
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <input type="submit" value="View Results">
+    </form>
+    {% endif %}
+</body>
+
+</html>
