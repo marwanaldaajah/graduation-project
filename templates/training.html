@@ -6,9 +6,9 @@
 </head>
 
 <body>
-    
+    {% if not models %}
     <h1>No models available. Please Try Again.</h1>
-    
+    {% else %}
     <h1>Select Model</h1>
     <form method="POST" action="{{ url_for('model_result') }}">
 
@@ -21,7 +21,7 @@
                 </tr>
             </thead>
             <tbody>
-               
+                {% for model in models %}
                 <tr>
                     <td>{{ model.name }}</td>
                     <td>{{ model.accuracy }}</td>
@@ -29,12 +29,12 @@
                         <input type="radio" name="model" value="{{ model.index }}">
                     </td>
                 </tr>
-               
+                {% endfor %}
             </tbody>
         </table>
         <input type="submit" value="View Results">
     </form>
-   
+    {% endif %}
 </body>
 
 </html>

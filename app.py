@@ -1,13 +1,10 @@
 
-import pickle
-import time
 from matplotlib import pyplot as plt
 from config.database import Database
 import os
 from flask import Flask, render_template, request, redirect, url_for
 import joblib
 from config.machine_learning import MachineLearning
-from model.model import Model
 
 
 app = Flask(__name__, template_folder='templates')
@@ -69,13 +66,13 @@ def train_model():
         print('start')
         machineLearning = MachineLearning()
         models = machineLearning.evaluateModels()
-        modells = machineLearning.evaluateModelsUsJoblib()
-        modells = machineLearning.evaluateModelsUsFixedLest()
+        m=machineLearning.evaluateModelsWithThreading()
         print('end')
         if not os.path.exists("result"):
             os.makedirs("result")
         for model in models:
-            joblib.dump(model.model, f"result/{model.index}.joblib")
+            if model != None:
+                joblib.dump(model.model, f"result/{model.index}.joblib")
         return render_template("training.html", models=models)
     return redirect(url_for("split_data"))
 
@@ -85,12 +82,11 @@ def model_result():
 
         index = request.form.get("model")
         model_path = f"result/{index}.joblib"
-        model = joblib.load(model_path)
+        load_model = joblib.load(model_path)
 
         machineLearning = MachineLearning()
 
-        # model = machineLearning.evaluate_modelJoblib(model)
-        # machineLearning.evaluate_modelsStaticLest()
+        model = machineLearning.evaluateSpecificMode(load_model)
         plot_data = plot_results(model)
 
         return render_template("model_results.html", model=model, plot_data=plot_data)
