@@ -6,17 +6,18 @@
   </head>
   <body>
     <h1>Upload CSV File</h1>
-    <form id="uploadborm" method="POST" enctype="multipart/form-data" action = "{{url_for('select_columns')}}">
-      <input type="file" id="fileInput" name="file" accept=".csv">
+    <label for="file-input" class="upload-button">Choose File</label>
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="{{ url_for('select_columns') }}">
+      <input type="file" id="file-input" name="file" accept=".csv">
     </form>
 
-    <script >
-      const fileInput = document.getElementById("fileInput");
-      fileInput.addEventListener("change", () => {
-        document.getElementById("uploadborm").submit();
+    <script>
+      const fileInput = document.getElementById("file-input");
+
+      fileInput.addEventListener("change", (event) => {
+        event.preventDefault();
+        uploadForm.submit();
       });
     </script>
   </body>
 </html>
-
-

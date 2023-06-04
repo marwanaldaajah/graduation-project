@@ -65,13 +65,13 @@ def train_model():
 
         print('start')
         machineLearning = MachineLearning()
-        models = machineLearning.evaluateModels()
-        m=machineLearning.evaluateModelsWithThreading()
+        models=machineLearning.evaluateModels()
         print('end')
         if not os.path.exists("result"):
             os.makedirs("result")
         for model in models:
             if model != None:
+                
                 joblib.dump(model.model, f"result/{model.index}.joblib")
         return render_template("training.html", models=models)
     return redirect(url_for("split_data"))
@@ -99,6 +99,7 @@ import base64
 
 def plot_results(model):
     # Extract model name, metrics, and scores from the model dictionary
+    print(f'model: {model}')
     model_name = str(model['name'])
     accuracy = model['accuracy']
     precision = model['precision']
